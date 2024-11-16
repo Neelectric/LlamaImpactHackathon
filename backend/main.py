@@ -66,25 +66,24 @@ class ConnectionManager:
 
 app = FastAPI()
 # Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3002", "http://127.0.0.1:3002"],  # Frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 manager = ConnectionManager()
 
 async def generate_option_data(option: str, dq: DataQuery) -> str:
     if option == "tweet_feed":
         tweet_id, tweet_content, image_path = dq.get_next()
-        return json.dumps({
+        print(tweet_id)
+        print(tweet_content)
+        print(image_path[0])
+        result_dict = {
             "type": "tweet",
-            "id": tweet_id,
+            "id": int(tweet_id),
             "content": tweet_content,
-            "image_path": image_path,
+            "image_path": image_path[0],
             "timestamp": "2024-03-16T10:00:00Z"  # You might want to get this from the tweet data
-        })
+        }
+        print(result_dict)
+        return json.dumps(result_dict)
     # Keep your existing options...
     return json.dumps({"error": "Invalid option"})
 
@@ -92,8 +91,10 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
 # Modify the websocket_endpoint function to pass the DataQuery instance:
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    print("starting websocket endpoint")
     dq = DataQuery("california_wildfires_final_data.json")  # Create instance here or pass it as parameter
     await manager.connect(websocket)
+    print("manager connected websocket!")
     try:
         while True:
             data = await websocket.receive_text()
@@ -116,28 +117,9 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
 
 
-
-
-# @app.on_event("startup")
-# async def on_startup():
-#     # Call the root function
-#     response = await root()
-#     print("Startup Response:", response)
-
 # Route for testing the API
 @app.get("/")
 async def root():
-    # response = ollama.chat(
-    #     model='llama3.2-vision',
-    #     messages=[{
-    #         'role': 'user',
-    #         'content': 'What is in this image?',
-    #         'images': ['water_helpers.jpg']
-    #     }],
-    #     options={
-    #     "temperature": 0
-    #     },
-    # )
 
     # response_text = response["message"]["content"]
     print("OVERWRITING RESPONSE TEXT")
