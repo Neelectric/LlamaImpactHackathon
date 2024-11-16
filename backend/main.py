@@ -1,4 +1,4 @@
-# Main driver file to prompt our model
+# 
 # System imports
 import json
 from os import getenv, path
@@ -26,7 +26,7 @@ server_http_host=getenv("SERVER_HTTP_HOST")
 api_http_port=int(getenv("API_HTTP_PORT"))
 api_http_url=getenv("API_HTTP_URL")
 
-ui_folder_root="frontend"
+ui_folder_root="disaster-feed-llama"
 ui_proxy_launch_cmd = getenv("UI_PROXY_LAUNCH_CMD")
 
 app_frontend_path = path.join(app_root_path, ui_folder_root)

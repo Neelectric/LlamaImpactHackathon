@@ -1,4 +1,6 @@
 import ollama
+from tqdm import tqdm
+import time
 
 response = ollama.chat(
     model='llama3.2-vision',
@@ -18,3 +20,4 @@ response = ollama.chat(
 response_text = response["message"]["content"]
 
 print(response_text)
+# print(response)
