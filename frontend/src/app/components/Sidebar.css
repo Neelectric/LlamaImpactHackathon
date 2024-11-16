@@ -1,0 +1,36 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -600px;
+    width: 600px;
+    height: 100vh;
+    background-color: black;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transition: left 0.3s ease;
+    z-index: 1000;
+}
+  
+.sidebar.open {
+    left: 0;
+}
+  
+.close-btn {
+    position: absolute;
+    top: 0px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    color: white;
+}
+  
+.content {
+    padding-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 100vh;
+    overflow-y: auto;      
+}

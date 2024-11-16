@@ -1,5 +1,8 @@
-import { Tweet } from 'react-tweet'
- 
-export default function Home() {
-  return <Tweet id="1628832338187636740" />
-}
+import React from 'react';
+import MapComponent from './components/Map';
+
+const Home = () => {
+  return <MapComponent />;
+};
+
+export default Home;
