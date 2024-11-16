@@ -15,22 +15,19 @@
     left: 0;
 }
   
-.close-btn {
-    position: absolute;
-    top: 0px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 40px;
-    cursor: pointer;
-    color: white;
-}
-  
 .content {
-    padding-top: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
     max-height: 100vh;
-    overflow-y: auto;      
+    overflow-y: auto;
+}
+
+.sticky-graph {
+    position: sticky;
+    z-index: 10; /* Ensure the graph stays above other content */
+    top: 0;
+    background-color: black;
+    width: 100%;
+    padding: 5vh;
 }

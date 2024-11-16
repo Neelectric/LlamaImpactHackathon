@@ -30,6 +30,7 @@ const MapComponent = () => {
       const feature = new Feature({
         geometry: new Point(fromLonLat(point.coords)),
       });
+      feature.set('tweetIds', point.tweetIds);
       return feature;
     });
 
@@ -63,8 +64,8 @@ const MapComponent = () => {
       const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => feature);
 
       if (feature) {
-        console.log('You clicked a point!');
-        setSelectedTweets(points[0].tweetIds);
+        const tweetIds = feature.get('tweetIds');
+        setSelectedTweets(tweetIds);
         setIsSideBarOpen(true);
       }
       else {
@@ -89,7 +90,7 @@ const MapComponent = () => {
           left: 0,
         }}
       />
-      <SideBar isOpen={isSideBarOpen} onClose={() => setIsSideBarOpen(false)} tweets={selectedTweets} />
+      <SideBar isOpen={isSideBarOpen} tweets={selectedTweets} />
     </>
   );
 };
