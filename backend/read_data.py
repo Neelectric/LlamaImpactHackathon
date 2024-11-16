@@ -30,7 +30,8 @@ def read_data_realistic():
 class DataQuery:
     def __init__(self, file_name, path="data/CrisisMMD_v2.0/json/"):
         self.file_name = file_name
-        self.df = pd.read_json(f'{path}{file_name}',lines=True).sort_values(by='created_at', ascending=True)
+        df = pd.read_json(f'{path}{file_name}',lines=True)
+        self.df = df.sort_values(by='created_at', ascending=True)
         self.index = 0
     
     def get_next(self):
@@ -50,7 +51,7 @@ class DataQuery:
         else:
             raise StopIteration("No more rows in DataFrame")
         
-dq = DataQuery("california_wildfires_final_data.json")
-print(dq.get_next())
-print(dq.get_next())
-print(dq.get_next())
+# dq = DataQuery("california_wildfires_final_data.json")
+# print(dq.get_next())
+# print(dq.get_next())
+# print(dq.get_next())
