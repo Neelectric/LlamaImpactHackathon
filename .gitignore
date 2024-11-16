@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 .llama_impact/
+backend/CrisisMMD_v2.0.tar.gz
+data/
