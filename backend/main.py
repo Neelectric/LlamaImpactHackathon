@@ -41,15 +41,29 @@ app = FastAPI()
 in_game = False
 
 
-# Define global variables
-# @app.on_event("startup")
-# def startup_event():
-#     global llm
-#     llm = LLM(device)
+@app.on_event("startup")
+async def on_startup():
+    # Call the root function
+    response = await root()
+    print("Startup Response:", response)
 
 # Route for testing the API
 @app.get("/")
 async def root():
+    response = ollama.chat(
+        model='llama3.2-vision',
+        messages=[{
+            'role': 'user',
+            'content': 'What is in this image?',
+            'images': ['water_helpers.jpg']
+        }],
+        options={
+        "temperature": 0
+        },
+    )
+
+    response_text = response["message"]["content"]
+    print(response_text)
     return {"message": "Hello from FastAPI!"}
 
 # Route for getting a response to a query
@@ -61,7 +75,7 @@ async def ask(question: Question):
         model='llama3.2-vision',
         messages=[{
             'role': 'user',
-            'content': 'What is in this image?',
+            'content': prompt,
             'images': ['water_helpers.jpg']
         }],
         options={
