@@ -31,12 +31,12 @@ processor = AutoProcessor.from_pretrained(model_id)
 url = "https://huggingface.co/datasets/huggingface/documentation-images/resolve/0052a70beed5bf71b92610a43a52df6d286cd5f3/diffusers/rabbit.jpg"
 # file = requests.get(url, stream=True).raw
 
-image = Image.open('hospital.jpg')
+image = Image.open('water_helpers.jpg')
 
 messages = [
     {"role": "user", "content": [
         {"type": "image"},
-        {"type": "text", "text": "Does this room look crowded?"}
+        {"type": "text", "text": "Describe what is going on in this image."}
     ]}
 ]
 input_text = processor.apply_chat_template(messages, add_generation_prompt=True)
@@ -49,6 +49,6 @@ inputs = processor(
 
 output = model.generate(
     **inputs, 
-    max_new_tokens=100
+    max_new_tokens=300
     )
 print(processor.decode(output[0]))
