@@ -38,7 +38,6 @@ class Question(BaseModel):
     prompt: str
 
 app = FastAPI()
-in_game = False
 
 
 @app.on_event("startup")
