@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import MapComponent from './components/Map';
 
 const Home = () => {
-  console.log("hello world");
+  const [tweets, setTweets] = useState([]);
   useEffect(() => {
     console.log("we are in useeffect!");
     // Create WebSocket connection
-    const wsUrl = 'http://127.0.0.1:5000/ws';  // Changed from 3002 to 8000
+    const wsUrl = 'http://127.0.0.1:5001/ws';  // Changed from 3002 to 8000
     console.log("Attempting to connect to:", wsUrl);
     const socket = new WebSocket(wsUrl);
 
@@ -24,12 +24,15 @@ const Home = () => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'tweet') {
-          console.log('Received tweet:', {
-            id: data.id,
-            content: data.content,
-            imagePath: data.image_path,
-            timestamp: data.timestamp
-          });
+          const newTweetId = data.id
+          console.log('Received tweet:', newTweetId);
+          setTweets((prevTweets) => [newTweetId, ...prevTweets]);
+          // console.log('Received tweet:', {
+          //   id: data.id,
+          //   content: data.content,
+          //   imagePath: data.image_path,
+          //   timestamp: data.timestamp
+          // });
         } else if (data.status === 'option_set') {
           console.log('Option set:', data.option);
         }
@@ -56,7 +59,7 @@ const Home = () => {
     };
   }, []); // Empty dependency array means this effect runs once on mount
 
-  return <MapComponent />;
+  return <MapComponent tweets={tweets} />
 };
 
 export default Home;

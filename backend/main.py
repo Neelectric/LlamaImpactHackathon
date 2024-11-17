@@ -2,13 +2,14 @@
 # System imports
 import json
 from os import getenv, path
+import os
 import subprocess
 import random  # for demo data generation
 from typing import Dict, Set
 import asyncio
 
 # External imports
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from pydantic import BaseModel
 import ollama
 
@@ -24,15 +25,15 @@ from read_data import DataQuery
 
 # Read in environment variables
 app_base_path = path.dirname(__file__)
-app_root_path = path.join(app_base_path, '../')
-load_dotenv(dotenv_path=path.join(app_root_path, '.env'))
+app_root_path = path.join(app_base_path, '..//')
+# load_dotenv(dotenv_path=path.join(app_root_path, '.env'))
 
-server_http_host=getenv("SERVER_HTTP_HOST")
-api_http_port=int(getenv("API_HTTP_PORT"))
-api_http_url=getenv("API_HTTP_URL")
+server_http_host='127.0.0.1'
+api_http_port=5001
+api_http_url='http://127.0.0.1:5001'
 
-ui_folder_root="frontend"
-ui_proxy_launch_cmd = getenv("UI_PROXY_LAUNCH_CMD")
+ui_folder_root='frontend'
+ui_proxy_launch_cmd = 'npm run dev'
 
 app_frontend_path = path.join(app_root_path, ui_folder_root)
 
@@ -77,7 +78,7 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
         print(image_path[0])
         result_dict = {
             "type": "tweet",
-            "id": int(tweet_id),
+            "id": str(tweet_id),
             "content": tweet_content,
             "image_path": image_path[0],
             "timestamp": "2024-03-16T10:00:00Z"  # You might want to get this from the tweet data
@@ -92,7 +93,7 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     print("starting websocket endpoint")
-    dq = DataQuery("california_wildfires_final_data.json")  # Create instance here or pass it as parameter
+    dq = DataQuery("california_wildfires_final_data_tweets.json")  # Create instance here or pass it as parameter
     await manager.connect(websocket)
     print("manager connected websocket!")
     try:
@@ -109,7 +110,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         if current_option:
                             data = await generate_option_data(current_option, dq)
                             await websocket.send_text(data)
-                        await asyncio.sleep(1)  # Send tweet every second
+                        await asyncio.sleep(5)  # Send tweet every second
             except json.JSONDecodeError:
                 await websocket.send_text(json.dumps({"error": "Invalid JSON format"}))
                 
@@ -156,16 +157,18 @@ async def ask(question: Question):
 if __name__ == "__main__":
     # Launch the frontend app as a separate Python subprocess
     # (essentially just goes to the frontend server and runs 'npm run dev' there for us)
-    spa_process = subprocess.Popen(
-        args=ui_proxy_launch_cmd.split(" "),
-        cwd=app_frontend_path
-    )
+
+    # spa_process = subprocess.Popen(
+    #     args=ui_proxy_launch_cmd.split(" "),
+    #     cwd='C:/Users/jonai/Code/LlamaImpactHackathon/frontend',
+    #     shell=True
+    # )
 
     # Launch the backend server
     # Uvicorn is a server programme that runs the 'app' object in 'main.py' (here)
     print("about to launch uvicorn")
-    dq = DataQuery("california_wildfires_final_data.json")
-    print(dq.get_next())
+    # dq = DataQuery("california_wildfires_final_data_tweets.json")
+    # print(dq.get_next())
     uvicorn.run(
         "main:app", 
         host=server_http_host, 

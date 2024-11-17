@@ -14,10 +14,10 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import SideBar from './Sidebar'; // Import the SideBar component
 
-const MapComponent = () => {
+const MapComponent = ({ tweets }) => {
   const mapContainer = useRef(null);
   const [isSideBarOpen, setIsSideBarOpen] = useState(false);
-  const [selectedTweets, setSelectedTweets] = useState([]);
+  const [selectedTweets, setSelectedTweets] = useState(tweets);
 
   const points = [
     { coords: [25.2797, 54.6872], tweetIds: ['1857678637446955410'] },
@@ -30,7 +30,7 @@ const MapComponent = () => {
       const feature = new Feature({
         geometry: new Point(fromLonLat(point.coords)),
       });
-      feature.set('tweetIds', point.tweetIds);
+      feature.set('tweetIds', "");
       return feature;
     });
 
@@ -64,9 +64,9 @@ const MapComponent = () => {
       const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => feature);
 
       if (feature) {
-        const tweetIds = feature.get('tweetIds');
-        setSelectedTweets(tweetIds);
         setIsSideBarOpen(true);
+        setSelectedTweets(tweets);
+        console.log(tweets.length)
       }
       else {
         setIsSideBarOpen(false);
@@ -90,7 +90,7 @@ const MapComponent = () => {
           left: 0,
         }}
       />
-      <SideBar isOpen={isSideBarOpen} tweets={selectedTweets} />
+      <SideBar isOpen={isSideBarOpen} tweets={tweets} />
     </>
   );
 };
