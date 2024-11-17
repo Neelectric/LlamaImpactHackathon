@@ -255,10 +255,11 @@ async def websocket_endpoint(websocket: WebSocket):
                     
                     while True:
                         current_option = manager.get_client_option(websocket)
+                        print(current_option)
                         if current_option:
                             data = await generate_option_data(current_option, dq)
                             await websocket.send_text(data)
-                        await asyncio.sleep(0.05)  # Send tweet every second
+                        await asyncio.sleep(0.1)  # Send tweet every second
             except json.JSONDecodeError:
                 await websocket.send_text(json.dumps({"error": "Invalid JSON format"}))
                 
@@ -275,8 +276,6 @@ async def root():
     response_text = "temp"
     print(response_text)
     return {"message": "Hello from FastAPI!"}
-
-
 
 
 if __name__ == "__main__":
