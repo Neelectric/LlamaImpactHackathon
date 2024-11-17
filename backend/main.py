@@ -113,7 +113,10 @@ manager = ConnectionManager()
 def encode_image(image_path):
   with open(image_path, "rb") as image_file:
     return base64.b64encode(image_file.read()).decode('utf-8')
-client = Groq()
+  
+with open('../env.txt', 'r') as file:
+    lines = file.readlines()
+client = Groq(api_key=lines[0].strip())
 
 def ask_groq(prompt, image_path):
     base64_image = encode_image(image_path)

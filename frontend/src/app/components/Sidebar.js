@@ -13,7 +13,7 @@ const Sidebar = ({ isOpen, tweets }) => {
                 <div className="sticky-graph">
                     <LineGraph />
                 </div>
-                {/* {tweets && tweets.length > 0 ? (
+                {tweets && tweets.length > 0 ? (
                     tweets.map((tweetId) => (
                         <div key={tweetId.id}>
                             <Tweet id={tweetId.id} />
@@ -21,10 +21,7 @@ const Sidebar = ({ isOpen, tweets }) => {
                     ))
                 ) : (
                     <p>No tweets available.</p>
-                )} */}
-                <div>
-                    <Tweet id={tweets[0]} />
-                </div>
+                )}
             </div>
         </div>
     );
