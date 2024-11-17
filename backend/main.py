@@ -200,7 +200,7 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
             result_dict = json.loads(llama_response)
             print(result_dict)
             result_dict["type"] = "tweet"
-            result_dict["id"] = int(tweet_id),
+            result_dict["id"] = str(tweet_id),
             result_dict["content"] = tweet_content,
             result_dict["image_path"] = image_path[0],
             result_dict["final_judgement_out_of_10"] = int(result_dict["final_judgement_out_of_10"])
@@ -209,7 +209,7 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
             print(error)
             result_dict = {
                 "type": "tweet",
-                "id": int(tweet_id),
+                "id": str(tweet_id),
                 "content": tweet_content,
                 "image_path": image_path[0],
                 "chain_of_thought": llama_response,

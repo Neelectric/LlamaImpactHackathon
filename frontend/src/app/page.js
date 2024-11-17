@@ -24,7 +24,15 @@ const Home = () => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'tweet') {
-          setTweets((prevTweets) => [newTweetId, ...prevTweets]);
+          const tweet = {
+            id: data.id,
+            content: data.content,
+            imagePath: data.image_path,
+            timestamp: data.timestamp,
+            chain_of_thought: data.chain_of_thought,
+            final_judgement_out_of_10: data.final_judgement_out_of_10
+          };
+          setTweets((prevTweets) => [tweet, ...prevTweets]);
           console.log('Received tweet:', {
             id: data.id,
             content: data.content,
