@@ -30,6 +30,8 @@ const Home = () => {
             content: data.content,
             imagePath: data.image_path,
             timestamp: data.timestamp,
+            location: data.location,
+            location_name: data.location_name,
             chain_of_thought: data.chain_of_thought,
             final_judgement_out_of_10: data.final_judgement_out_of_10
           };
@@ -44,6 +46,7 @@ const Home = () => {
             content: data.content,
             imagePath: data.image_path,
             timestamp: data.timestamp,
+            location: data.location,
             chain_of_thought: data.chain_of_thought,
             final_judgement_out_of_10: data.final_judgement_out_of_10
           });

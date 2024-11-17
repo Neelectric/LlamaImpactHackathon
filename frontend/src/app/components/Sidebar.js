@@ -5,12 +5,12 @@ import './Sidebar.css'; // We'll style the sidebar here
 import { Tweet } from 'react-tweet';
 import LineGraph from './Graph'; // Import the LineGraph component
 
-const Sidebar = ({ isOpen, tweets, judgements }) => {
-    console.log(tweets);
+const Sidebar = ({ isOpen, tweets, judgements}) => {
     return (
         <div className={`sidebar ${isOpen ? 'open' : ''}`}>
             <div className="content">
                 <div className="sticky-graph">
+                    <LineGraph judgements={judgements}/>
                     <LineGraph judgements={judgements}/>
                 </div>
                 {tweets && tweets.length > 0 ? (

@@ -110,13 +110,14 @@ class DataQuery:
             # print(date_str)
             date_obj = pd.to_datetime(date_str, format="%Y-%m-%d %H:%M:%S%z")
             formatted_date = date_obj.strftime('%d_%m_%Y')
-            img_path = "data/CrisisMMD_v2.0/data_image/" + "california_wildfires" + "/" + formatted_date + "/"
+            formatted_date = "_".join(str(int(part)) for part in formatted_date.split("_"))
+            img_path = "data/CrisisMMD_v2.0/data_image/" + row["location"] + "/" + formatted_date + "/"
             matching_files = [f for f in os.listdir(img_path) if str(row["id"]) in f and f[0]!="."]
             img_paths = [img_path + f for f in matching_files]
             if len(img_paths) > 0:
-                return row["id"], row["text"], img_paths
+                return row["id"], row["text"], row["location"], img_paths
             else:
-                return row["id"], row["text"], None
+                return row["id"], row["text"], row["location"], None
         else:
             raise StopIteration("No more rows in DataFrame")
         
