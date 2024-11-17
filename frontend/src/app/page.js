@@ -24,15 +24,15 @@ const Home = () => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'tweet') {
-          const newTweetId = data.id
-          console.log('Received tweet:', newTweetId);
           setTweets((prevTweets) => [newTweetId, ...prevTweets]);
-          // console.log('Received tweet:', {
-          //   id: data.id,
-          //   content: data.content,
-          //   imagePath: data.image_path,
-          //   timestamp: data.timestamp
-          // });
+          console.log('Received tweet:', {
+            id: data.id,
+            content: data.content,
+            imagePath: data.image_path,
+            timestamp: data.timestamp,
+            chain_of_thought: data.chain_of_thought,
+            final_judgement_out_of_10: data.final_judgement_out_of_10
+          });
         } else if (data.status === 'option_set') {
           console.log('Option set:', data.option);
         }
