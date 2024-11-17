@@ -43,7 +43,8 @@ app_frontend_path = path.join(app_root_path, ui_folder_root)
 california_coords = [-119.4179, 36.7783]
 iraq_iran_coords = [53.6880, 32.4279]
 srilanka_coords = [80.7718, 7.8731]
-stdv = 0.1
+harvey_coords = [-100.0, 31.0]
+stdv = 2
 
 
 # Launch the app
@@ -218,6 +219,9 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
             elif location == "srilanka_floods":
                 result_dict["location"] = [random.gauss(srilanka_coords[0], stdv), random.gauss(srilanka_coords[1], stdv)]
                 result_dict["location_name"] = "Sri Lanka"
+            elif location == "hurricane_harvey":
+                result_dict["location"] = [random.gauss(harvey_coords[0], stdv), random.gauss(harvey_coords[1], stdv)]
+                result_dict["location_name"] = "Harvey"
             result_dict["final_judgement_out_of_10"] = int(result_dict["final_judgement_out_of_10"])
 
         except Exception as error:
@@ -241,7 +245,7 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     print("starting websocket endpoint")
-    dq = DataQuery("combined_shuffled_tweets.json")  # Create instance here or pass it as parameter
+    dq = DataQuery("shuffled.json")  # Create instance here or pass it as parameter
     await manager.connect(websocket)
     print("manager connected websocket!")
     try:

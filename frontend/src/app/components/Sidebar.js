@@ -11,7 +11,6 @@ const Sidebar = ({ isOpen, tweets, judgements}) => {
             <div className="content">
                 <div className="sticky-graph">
                     <LineGraph judgements={judgements}/>
-                    <LineGraph judgements={judgements}/>
                 </div>
                 {tweets && tweets.length > 0 ? (
                     tweets.map((tweetId) => (

@@ -32,8 +32,8 @@ const MapComponent = ({ tweets, judgements }) => {
       const vectorSource = new VectorSource();
       const heatmapLayer = new HeatmapLayer({
         source: vectorSource,
-        blur: 15,
-        radius: 5,
+        blur: 30,
+        radius: 15,
       });
       heatmapLayerRef.current = heatmapLayer;
 
@@ -94,13 +94,18 @@ const MapComponent = ({ tweets, judgements }) => {
         });
       });
 
-      const selectedTweets = tweets.filter(tweet => tweet.location_name === selectedLocation);
-      console.log(selectedTweets);
-      setSelectedTweets(selectedTweets);
-
       vectorSource.addFeatures(features);
     }
   }, [tweets]); // Re-run effect when points array changes
+
+  useEffect(() => {
+    // When selectedLocation changes, update selectedTweets and selectedJudgements
+    const selectedTweets = tweets.filter(tweet => tweet.location_name === selectedLocation);
+    const selectedJudgements = judgements.filter(judgement => judgement.location_name === selectedLocation);
+  
+    setSelectedTweets(selectedTweets);
+    setSelectedJudgements(selectedJudgements);
+  }, [selectedLocation, tweets, judgements]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -124,7 +129,7 @@ const MapComponent = ({ tweets, judgements }) => {
           left: 0,
         }}
       />
-      <SideBar isOpen={isSideBarOpen} tweets={selectedTweets} judgements={judgements}/>
+      <SideBar isOpen={isSideBarOpen} tweets={selectedTweets} judgements={selectedJudgements}/>
     </>
   );
 };

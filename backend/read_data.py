@@ -4,6 +4,7 @@ import os
 import json
 import random
 import numpy as np
+import io
 
 pd.set_option('display.max_colwidth', None)
 
@@ -228,7 +229,24 @@ class DataQuery:
         
 def mix_data(tsv_path, json_path, output_path):
     tsv_df = pd.read_csv(tsv_path, sep='\t')
-    json_df = pd.read_json(json_path, lines=True)
+    with open(json_path, 'r') as file:  # Replace with your file path
+        valid_lines = []
+        for idx, line in enumerate(file, start=1):
+            stripped = line.strip()
+            # Check if the line starts with valid JSON structures
+            if stripped and stripped[0] in '{[':
+                try:
+                    # Validate if the line is valid JSON
+                    pd.json_normalize([pd.read_json(io.StringIO(stripped), typ='series')])
+                    valid_lines.append(stripped)
+                except ValueError as e:
+                    print(f"Skipping malformed line {idx}: {stripped}\nError: {e}")
+
+    # Combine valid lines into a single string
+    valid_json = "\n".join(valid_lines)
+
+    # Load the cleaned JSON lines into a pandas DataFrame
+    json_df = pd.read_json(io.StringIO(valid_json), lines=True)
     json_df = json_df.replace([np.nan], [None])
     tsv_df.rename(columns={'tweet_id': 'id'}, inplace=True)
     merged_df = pd.merge(tsv_df, json_df, on='id', how='inner')
@@ -268,12 +286,14 @@ def mix_data(tsv_path, json_path, output_path):
     df_combined["created_at"] = df_combined["created_at"].astype(str)
     df_combined["timestamp_ms"] = df_combined["timestamp_ms"].astype(str)
 
+    df_combined.drop_duplicates(subset='id', inplace=True)
+
     # Save the combined dataframe to a new JSON file
-    data = df_combined.to_dict(orient="records")
+    df_combined.to_json(output_path, orient="records", lines=True)
 
     # Write JSON without escaping forward slashes
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False)
+    # with open(output_path, "w", encoding="utf-8") as f:
+    #     json.dump(data, f, ensure_ascii=False)
 
 def process_files(annotation_dir, json_dir, output_dir):
     if not os.path.exists(output_dir):
@@ -282,19 +302,20 @@ def process_files(annotation_dir, json_dir, output_dir):
     # Get lists of files in both directories
     annotation_files = os.listdir(annotation_dir)
     json_files = os.listdir(json_dir)
-    done = [file.split(".")[0] for file in os.listdir(output_dir) if file[0] != "."]
+    # done = [file.split(".")[0] for file in os.listdir(output_dir) if file[0] != "."]
     for tsv_name in annotation_files:
-        if tsv_name[0] != "." and "_".join(tsv_name.split('_')[:2]) not in done and "_" in tsv_name:
+        if tsv_name[0] != "." and "_".join(tsv_name.split('_')[:2]):
             name = "_".join(tsv_name.split('_')[:2])
             json_name = [file for file in json_files if name in file][0]
-            mix_data(f"{annotation_dir}/{tsv_name}", f"{json_dir}/{json_name}", f"{output_dir}/{name}.json")
             print(f"Doing {tsv_name} and {json_name}")
+            mix_data(f"{annotation_dir}/{tsv_name}", f"{json_dir}/{json_name}", f"{output_dir}/{name}.json")
+            
 
-#tsv_path = 'C:/Users/usuario/Desktop/se rompio el disco/uni/hackathons/Meta 2024/LlamaImpactHackathon/backend/data/CrisisMMD_v2.0/annotations/california_wildfires_final_data.tsv'
-#json_path = 'C:/Users/usuario/Desktop/se rompio el disco/uni/hackathons/Meta 2024/LlamaImpactHackathon/backend/data/CrisisMMD_v2.0/json/california_wildfires_final_data.json'
-#mix_data(tsv_path, json_path)
-data_dir = os.getcwd() + "\\data\\CrisisMMD_v2.0"
-process_files(f"{data_dir}\\annotations", f"{data_dir}\\json", f"{data_dir}\\merged")
+# tsv_path = 'C:/Users/usuario/Desktop/se rompio el disco/uni/hackathons/Meta 2024/LlamaImpactHackathon/backend/data/CrisisMMD_v2.0/annotations/california_wildfires_final_data.tsv'
+# json_path = 'C:/Users/jonai/Code/LlamaImpactHackathon/backend/data/CrisisMMD_v2.0/json/combined_shuffled_tweets.json'
+# mix_data(tsv_path, json_path, "sorted_data.json")
+# data_dir = os.getcwd() + "\\data\\CrisisMMD_v2.0"
+# process_files(f"{data_dir}\\annotations", f"{data_dir}\\json", f"{data_dir}\\merged")
 #dq = DataQuery("california_wildfires_final_data.json")
 #print(dq.get_next())
 #print(dq.get_next())

@@ -37,7 +37,8 @@ const Home = () => {
           };
           const judgement = {
             judgeval: data.final_judgement_out_of_10,
-            timestamp: data.timestamp
+            timestamp: data.timestamp,
+            location_name: data.location_name,
           };
           setTweets((prevTweets) => [tweet, ...prevTweets]);
           setJudgements((prevJudgements) => [judgement, ...prevJudgements]);

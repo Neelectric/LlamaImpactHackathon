@@ -22,26 +22,35 @@ ChartJS.register(
     Legend
 );
 
-const LineGraph = ({judgements}) => {
-    // Initial data
-    console.log("mamamuevo")
+const LineGraph = ({ judgements }) => {
+    // Fallback for when no judgements are available
+    if (!judgements || judgements.length === 0) {
+        return (
+            <div className="text-center p-4 bg-gray-100 rounded-md shadow-md">
+                <p className="text-gray-500">No data available to display.</p>
+            </div>
+        );
+    }
+
+    // Initial chart data
     const initialData = {
-        labels: ["Point 1", "Point 2", "Point 3", "Point 4", "Point 5"],
+        labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5"],
         datasets: [
             {
-                label: "Natural Disaster Score",
-                backgroundColor: "rgba(75, 192, 192, 0.2)",
-                // borderColor: "rgba(75, 192, 192, 1)",
-                borderColor: "rgba(250, 0, 0, 1)",
+                label: `Natural Disaster Score`,
+                backgroundColor: "rgba(255, 99, 132, 0.2)",
+                borderColor: "rgba(255, 99, 132, 1)",
                 borderWidth: 2,
-                pointRadius: 3,
+                pointRadius: 5,
+                pointBackgroundColor: "rgba(255, 99, 132, 1)",
+                pointHoverRadius: 7,
                 data: [0, 0, 0, 0, 0],
             },
         ],
     };
 
-
     const [chartData, setChartData] = useState(initialData);
+
     // Function to compute running average
     const computeRunningAverage = (data, numPoints) => {
         const averages = [];
@@ -73,61 +82,69 @@ const LineGraph = ({judgements}) => {
         }));
     }, [judgements]);
 
-    // // Function to update data
-    // const updateData = () => {
-    //     const newDataPoint = Math.floor(Math.random() * 20) + 1; // Generate random data
-    //     setChartData((prev) => {
-    //         const updatedData = [...prev.datasets[0].data.slice(1), newDataPoint]; // Shift left and add new data
-    //         return {
-    //             ...prev,
-    //             datasets: [
-    //                 {
-    //                     ...prev.datasets[0],
-    //                     data: updatedData,
-    //                 },
-    //             ],
-    //         };
-    //     });
-    // };
-
     // Chart options
     const options = {
         responsive: true,
-        maintainAspectRatio: false, // Enable custom sizing
-        animation: {
-            duration: 30, // Animation duration
-            // easing: "easeOutCubic", // Animation easing
-        },
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 display: true,
                 position: "top",
+                labels: {
+                    font: {
+                        size: 14,
+                        family: "'Inter', sans-serif",
+                        weight: "500",
+                    },
+                    color: "white",
+                },
             },
             title: {
                 display: true,
-                text: "Local Natural Disaster Score",
+                text: judgements.length > 0 
+                    ? `Local Natural Disaster Score for ${judgements[0].location_name}`
+                    : "Local Natural Disaster Score",
+                font: {
+                    size: 18,
+                    family: "'Inter', sans-serif",
+                    weight: "600",
+                },
+                color: "#ffffff",
             },
         },
         scales: {
             x: {
-                beginAtZero: true,
+                grid: {
+                    color: "rgba(200, 200, 200, 0.2)",
+                },
+                ticks: {
+                    font: {
+                        size: 12,
+                        family: "'Inter', sans-serif",
+                    },
+                    color: "#ffffff",
+                },
             },
             y: {
                 beginAtZero: true,
+                grid: {
+                    color: "rgba(200, 200, 200, 0.2)",
+                },
+                ticks: {
+                    font: {
+                        size: 12,
+                        family: "'Inter', sans-serif",
+                    },
+                    color: "#ffffff",
+                },
             },
         },
     };
 
-    // Periodically update data
-    // useEffect(() => {
-    //     const interval = setInterval(updateData, 2000); // Update every 2 seconds
-    //     return () => clearInterval(interval); // Cleanup on unmount
-    // }, []);
-
     return (
-        <div className="w-full max-w-md mx-auto bg-white p-4 shadow-md rounded-md">
-            <div className="relative" style={{ height: "275px" }}>
-                <Line data={chartData} options={options} height={400} width={600}/>
+        <div className="w-full max-w-lg mx-auto bg-white p-6 shadow-lg rounded-md">
+            <div className="relative" style={{ height: "300px" }}>
+                <Line data={chartData} options={options} />
             </div>
         </div>
     );
