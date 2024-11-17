@@ -245,6 +245,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     
                     while True:
                         current_option = manager.get_client_option(websocket)
+                        print(current_option)
                         if current_option:
                             data = await generate_option_data(current_option, dq)
                             await websocket.send_text(data)
@@ -265,8 +266,6 @@ async def root():
     response_text = "temp"
     print(response_text)
     return {"message": "Hello from FastAPI!"}
-
-
 
 
 if __name__ == "__main__":
