@@ -89,132 +89,27 @@ def read_json_file(json_path):
     
     raise ValueError(f"Could not read JSON file at {json_path}. The file might be corrupted or in an invalid format.")
 
-def clean_for_json(value):
-    """Convert non-serializable values to JSON-compatible format"""
-    try:
-        # Handle numpy arrays and pandas Series
-        if isinstance(value, (np.ndarray, pd.Series)):
-            return clean_for_json(value.tolist())
-        # Handle lists and other iterables
-        elif isinstance(value, (list, tuple)):
-            return [clean_for_json(v) for v in value]
-        # Handle individual values
-        elif pd.api.types.is_float(value):
-            return None if np.isnan(value) else float(value)
-        elif isinstance(value, (np.int64, np.int32)):
-            return int(value)
-        elif isinstance(value, pd.Timestamp):
-            return value.isoformat()
-        elif pd.api.types.is_scalar(value) and pd.isna(value):
-            return None
-        return value
-    except:
-        return None
 
-def jumble_data(tsv_path, json_path):
-    # Read TSV with all values as strings initially to preserve data
-    df_tsv = pd.read_csv(tsv_path, sep='\t', dtype=str)
-    
-    # Split the data into informative and not_informative
-    df_informative = df_tsv[df_tsv['text_info'] == 'informative'].copy()
-    print(df_informative.head(2))
-    df_not_informative = df_tsv[df_tsv['text_info'] == 'not_informative'].copy()
-    print(df_not_informative.head(2))
-    
-    # Load JSON data using the helper function
-    try:
-        df_json = read_json_file(json_path)
-        print(f"Successfully read JSON file. Shape: {df_json.shape}, Columns: {df_json.columns.tolist()}")
-    except Exception as e:
-        print(f"Error details: {str(e)}")
-        # Print first few lines of the JSON file for debugging
-        with open(json_path, 'r', encoding='utf-8') as f:
-            print("First few lines of JSON file:")
-            print(f.read(500))
-        raise
-    
-    # Validate required columns
-    if 'id' not in df_json.columns or 'created_at' not in df_json.columns:
-        raise ValueError("JSON data must contain 'id' and 'created_at' fields.")
-    
-    # Convert tweet_id to string in both dataframes to ensure matching
-    df_informative['tweet_id'] = df_informative['tweet_id'].astype(str)
-    df_json['id'] = df_json['id'].astype(str)
-    
-    # Merge with explicit handling of null values
-    df_informative = df_informative.merge(
-        df_json,
-        left_on='tweet_id',
-        right_on='id',
-        how='left'
-    )
-    
-    # Handle date sorting while preserving null values
-    def safe_date_convert(date_val):
-        if pd.isna(date_val) or date_val == '' or date_val is None:
-            return pd.NaT
-        return pd.to_datetime(date_val, errors='coerce')
-    
-    df_informative['date'] = df_informative['created_at'].apply(safe_date_convert)
-    df_informative_sorted = df_informative.sort_values(
-        by='date',
-        na_position='first'
-    )
-    
-    # Get the complete set of columns from both dataframes
-    all_columns = list(set(df_informative_sorted.columns) | set(df_not_informative.columns))
-    
-    # Initialize missing columns in both dataframes
-    for col in all_columns:
-        if col not in df_informative_sorted.columns:
-            df_informative_sorted[col] = None
-        if col not in df_not_informative.columns:
-            df_not_informative[col] = None
-    
-    # Ensure both dataframes have exactly the same columns in the same order
-    df_informative_sorted = df_informative_sorted[all_columns]
-    df_not_informative = df_not_informative[all_columns]
-    
-    # Concatenate the dataframes
-    mixed_data = pd.concat(
-        [df_not_informative, df_informative_sorted],
-        ignore_index=True,
-        copy=True
-    )
-    
-    # Shuffle not_informative entries
-    not_informative_indices = mixed_data[mixed_data['text_info'] == 'not_informative'].index.tolist()
-    informative_indices = mixed_data[mixed_data['text_info'] == 'informative'].index.tolist()
-    random.shuffle(not_informative_indices)
-    
-    # Create final dataset
-    final_indices = not_informative_indices + informative_indices
-    mixed_data = mixed_data.reindex(final_indices).reset_index(drop=True)
-    
-    # Convert DataFrame to list of dicts and clean the data
-    json_result = [
-        {k: clean_for_json(v) for k, v in record.items()}
-        for record in mixed_data.replace({np.nan: None}).to_dict(orient='records')
-    ]
-    
-    # Write back to JSON file
-    with open(json_path, 'w', encoding='utf-8') as json_file:
-        json.dump(json_result, json_file, indent=4)
-    
-    return mixed_data
 
 class DataQuery:
-    def __init__(self, file_name, path="data/CrisisMMD_v2.0/json/"):
+    def __init__(self, file_name, path="data/CrisisMMD_v2.0/merged/"):
         self.file_name = file_name
-        self.df = pd.read_json(f'{path}{file_name}',lines=True)
+        full_path = f'{path}{file_name}'
+        print(full_path)
+        with open(full_path) as f:
+            json_file = json.load(f)
+        self.df = pd.DataFrame.from_dict(json_file)
+        print(self.df.columns)
         self.index = 0
     
     def get_next(self):
         if self.index < len(self.df):
             row = self.df.iloc[self.index]
+            # print(row)
             self.index += 1
             date_str = row["created_at"]
-            date_obj = pd.to_datetime(date_str, format='%a %b %d %H:%M:%S %z %Y')
+            # print(date_str)
+            date_obj = pd.to_datetime(date_str, format="%Y-%m-%d %H:%M:%S%z")
             formatted_date = date_obj.strftime('%d_%m_%Y')
             formatted_date = "_".join(str(int(part)) for part in formatted_date.split("_"))
             img_path = "data/CrisisMMD_v2.0/data_image/" + row["location"] + "/" + formatted_date + "/"
@@ -250,37 +145,42 @@ def mix_data(tsv_path, json_path, output_path):
     json_df = json_df.replace([np.nan], [None])
     tsv_df.rename(columns={'tweet_id': 'id'}, inplace=True)
     merged_df = pd.merge(tsv_df, json_df, on='id', how='inner')
-    df_informative = merged_df[merged_df['text_info'] == 'informative']
-    df_not_informative = merged_df[merged_df['text_info'] == 'not_informative']
-    df_informative['created_at'] = pd.to_datetime(df_informative['created_at'])
+    merged_df = merged_df.sort_values(by="image_damage")
+    df_combined = merged_df
 
-    # Sort by the 'created_at' column
-    df_informative_sorted = df_informative.sort_values(by='created_at')
+
+    # df_informative = merged_df[merged_df['text_info'] == 'informative']
+    # df_not_informative = merged_df[merged_df['text_info'] == 'not_informative']
+    # df_informative['created_at'] = pd.to_datetime(df_informative['created_at'])
+    # df_not_informative['created_at'] = pd.to_datetime(df_not_informative['created_at'])
+
+    # # Sort by the 'created_at' column
+    # df_informative_sorted = df_informative.sort_values(by='created_at')
     
-    df_not_informative_shuffled = df_not_informative.sample(frac=1, random_state=42).reset_index(drop=True)
+    # df_not_informative_shuffled = df_not_informative.sample(frac=1, random_state=42).reset_index(drop=True)
 
-    # Get the number of rows in each dataframe
-    num_informative = len(df_informative_sorted)
-    num_not_informative = len(df_not_informative_shuffled)
+    # # Get the number of rows in each dataframe
+    # num_informative = len(df_informative_sorted)
+    # num_not_informative = len(df_not_informative_shuffled)
 
-    # Create a weight distribution for intercalation (higher weight near the start)
-    weights = np.linspace(1, 0.2, num_informative)  # Linear decrease in weight
-    normalized_weights = weights / weights.sum()
+    # # Create a weight distribution for intercalation (higher weight near the start)
+    # weights = np.linspace(1, 0.2, num_informative)  # Linear decrease in weight
+    # normalized_weights = weights / weights.sum()
 
-    # Randomly intercalate rows from df_not_informative
-    intercalation_indices = np.random.choice(
-        range(num_informative),
-        size=min(num_not_informative, num_informative),
-        replace=False,
-        p=normalized_weights
-    )
-    df_combined = df_informative_sorted.copy()
-    for i, idx in enumerate(sorted(intercalation_indices)):
-        # Insert rows from df_not_informative into df_combined
-        row_to_insert = df_not_informative_shuffled.iloc[i]
-        df_combined = pd.concat(
-            [df_combined.iloc[:idx], pd.DataFrame([row_to_insert]), df_combined.iloc[idx:]]
-        ).reset_index(drop=True)
+    # # Randomly intercalate rows from df_not_informative
+    # intercalation_indices = np.random.choice(
+    #     range(num_informative),
+    #     size=min(num_not_informative, num_informative),
+    #     replace=False,
+    #     p=normalized_weights
+    # )
+    # df_combined = df_informative_sorted.copy()
+    # for i, idx in enumerate(sorted(intercalation_indices)):
+    #     # Insert rows from df_not_informative into df_combined
+    #     row_to_insert = df_not_informative_shuffled.iloc[i]
+    #     df_combined = pd.concat(
+    #         [df_combined.iloc[:idx], pd.DataFrame([row_to_insert]), df_combined.iloc[idx:]]
+    #     ).reset_index(drop=True)
 
     df_combined = df_combined.replace([np.nan], [None])
     df_combined["created_at"] = df_combined["created_at"].astype(str)
@@ -311,11 +211,11 @@ def process_files(annotation_dir, json_dir, output_dir):
             mix_data(f"{annotation_dir}/{tsv_name}", f"{json_dir}/{json_name}", f"{output_dir}/{name}.json")
             
 
-# tsv_path = 'C:/Users/usuario/Desktop/se rompio el disco/uni/hackathons/Meta 2024/LlamaImpactHackathon/backend/data/CrisisMMD_v2.0/annotations/california_wildfires_final_data.tsv'
-# json_path = 'C:/Users/jonai/Code/LlamaImpactHackathon/backend/data/CrisisMMD_v2.0/json/combined_shuffled_tweets.json'
-# mix_data(tsv_path, json_path, "sorted_data.json")
-# data_dir = os.getcwd() + "\\data\\CrisisMMD_v2.0"
-# process_files(f"{data_dir}\\annotations", f"{data_dir}\\json", f"{data_dir}\\merged")
+#tsv_path = 'C:/Users/usuario/Desktop/se rompio el disco/uni/hackathons/Meta 2024/LlamaImpactHackathon/backend/data/CrisisMMD_v2.0/annotations/california_wildfires_final_data.tsv'
+#json_path = 'C:/Users/usuario/Desktop/se rompio el disco/uni/hackathons/Meta 2024/LlamaImpactHackathon/backend/data/CrisisMMD_v2.0/json/california_wildfires_final_data.json'
+#mix_data(tsv_path, json_path)
+# data_dir = os.getcwd() + "/data/CrisisMMD_v2.0"
+# process_files(f"{data_dir}/annotations", f"{data_dir}/json", f"{data_dir}/merged")
 #dq = DataQuery("california_wildfires_final_data.json")
 #print(dq.get_next())
 #print(dq.get_next())
