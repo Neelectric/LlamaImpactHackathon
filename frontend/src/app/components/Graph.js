@@ -29,7 +29,7 @@ const LineGraph = ({judgements}) => {
         labels: ["Point 1", "Point 2", "Point 3", "Point 4", "Point 5"],
         datasets: [
             {
-                label: "Dynamic Line Data",
+                label: "Natural Disaster Score",
                 backgroundColor: "rgba(75, 192, 192, 0.2)",
                 // borderColor: "rgba(75, 192, 192, 1)",
                 borderColor: "rgba(250, 0, 0, 1)",
@@ -105,7 +105,7 @@ const LineGraph = ({judgements}) => {
             },
             title: {
                 display: true,
-                text: "Dynamic Line Graph",
+                text: "Local Natural Disaster Score",
             },
         },
         scales: {
