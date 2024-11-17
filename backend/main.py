@@ -40,6 +40,10 @@ ui_proxy_launch_cmd = 'npm run dev'
 
 app_frontend_path = path.join(app_root_path, ui_folder_root)
 
+california_coords = [-119.4179, 36.7783]
+iraq_iran_coords = [53.6880, 32.4279]
+srilanka_coords = [80.7718, 7.8731]
+stdv = 0.1
 
 
 # Launch the app
@@ -196,20 +200,27 @@ async def ask(tweet_content, image_path):
 
 async def generate_option_data(option: str, dq: DataQuery) -> str:
     if option == "tweet_feed":
-        tweet_id, tweet_content, image_path = dq.get_next()
+        tweet_id, tweet_content, location, image_path = dq.get_next()
         image_path = image_path[0]
         llama_response = await ask(tweet_content=tweet_content, image_path=image_path)
         try:
             result_dict = json.loads(llama_response)
-            print(result_dict)
             result_dict["type"] = "tweet"
-            result_dict["id"] = str(tweet_id),
-            result_dict["content"] = tweet_content,
-            result_dict["image_path"] = image_path[0],
+            result_dict["id"] = str(tweet_id)
+            result_dict["content"] = tweet_content
+            result_dict["image_path"] = image_path[0]
+            if location == "california_wildfires":
+                result_dict["location"] = [random.gauss(california_coords[0], stdv), random.gauss(california_coords[1], stdv)]
+                result_dict["location_name"] = "California"
+            elif location == "iraq_iran_earthquake":
+                result_dict["location"] = [random.gauss(iraq_iran_coords[0], stdv), random.gauss(iraq_iran_coords[1], stdv)]
+                result_dict["location_name"] = "Iraq-Iran"
+            elif location == "srilanka_floods":
+                result_dict["location"] = [random.gauss(srilanka_coords[0], stdv), random.gauss(srilanka_coords[1], stdv)]
+                result_dict["location_name"] = "Sri Lanka"
             result_dict["final_judgement_out_of_10"] = int(result_dict["final_judgement_out_of_10"])
 
         except Exception as error:
-            print(error)
             result_dict = {
                 "type": "tweet",
                 "id": str(tweet_id),
@@ -219,7 +230,6 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
                 "final_judgement_out_of_10": 0,
                 "timestamp": "2024-03-16T10:00:00Z",  # You might want to get this from the tweet data
             }
-        print(result_dict["final_judgement_out_of_10"])
 
         # print(result_dict)
         return json.dumps(result_dict)
@@ -231,7 +241,7 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     print("starting websocket endpoint")
-    dq = DataQuery("california_wildfires_final_data_tweets.json")  # Create instance here or pass it as parameter
+    dq = DataQuery("combined_shuffled_tweets.json")  # Create instance here or pass it as parameter
     await manager.connect(websocket)
     print("manager connected websocket!")
     try:
@@ -248,7 +258,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         if current_option:
                             data = await generate_option_data(current_option, dq)
                             await websocket.send_text(data)
-                        await asyncio.sleep(5)  # Send tweet every second
+                        await asyncio.sleep(0.05)  # Send tweet every second
             except json.JSONDecodeError:
                 await websocket.send_text(json.dumps({"error": "Invalid JSON format"}))
                 
