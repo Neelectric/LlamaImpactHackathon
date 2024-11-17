@@ -114,6 +114,7 @@ const LineGraph = ({judgements}) => {
             },
             y: {
                 beginAtZero: true,
+                max: 10, 
             },
         },
     };

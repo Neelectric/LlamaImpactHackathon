@@ -231,7 +231,7 @@ async def generate_option_data(option: str, dq: DataQuery) -> str:
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     print("starting websocket endpoint")
-    dq = DataQuery("california_wildfires_final_data_tweets.json")  # Create instance here or pass it as parameter
+    dq = DataQuery("california_wildfires.json")  # Create instance here or pass it as parameter
     await manager.connect(websocket)
     print("manager connected websocket!")
     try:
@@ -249,7 +249,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         if current_option:
                             data = await generate_option_data(current_option, dq)
                             await websocket.send_text(data)
-                        await asyncio.sleep(0.1)  # Send tweet every second
+                        await asyncio.sleep(1)  # Send tweet every second
             except json.JSONDecodeError:
                 await websocket.send_text(json.dumps({"error": "Invalid JSON format"}))
                 
