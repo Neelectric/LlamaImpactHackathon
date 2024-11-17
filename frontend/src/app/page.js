@@ -5,6 +5,7 @@ import MapComponent from './components/Map';
 
 const Home = () => {
   const [tweets, setTweets] = useState([]);
+  const [judgements, setJudgements] = useState([]);
   useEffect(() => {
     console.log("we are in useeffect!");
     // Create WebSocket connection
@@ -32,7 +33,12 @@ const Home = () => {
             chain_of_thought: data.chain_of_thought,
             final_judgement_out_of_10: data.final_judgement_out_of_10
           };
+          const judgement = {
+            judgeval: data.final_judgement_out_of_10,
+            timestamp: data.timestamp
+          };
           setTweets((prevTweets) => [tweet, ...prevTweets]);
+          setJudgements((prevJudgements) => [judgement, ...prevJudgements]);
           console.log('Received tweet:', {
             id: data.id,
             content: data.content,
@@ -67,7 +73,7 @@ const Home = () => {
     };
   }, []); // Empty dependency array means this effect runs once on mount
 
-  return <MapComponent tweets={tweets} />
+  return <MapComponent tweets={tweets} judgements={judgements}/>
 };
 
 export default Home;

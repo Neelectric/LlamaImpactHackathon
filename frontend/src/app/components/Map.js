@@ -14,10 +14,11 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import SideBar from './Sidebar'; // Import the SideBar component
 
-const MapComponent = ({ tweets }) => {
+const MapComponent = ({ tweets, judgements }) => {
   const mapContainer = useRef(null);
   const [isSideBarOpen, setIsSideBarOpen] = useState(false);
   const [selectedTweets, setSelectedTweets] = useState(tweets);
+  const [selectedJudgements, setSelectedJudgements] = useState(judgements);
 
   const points = [
     { coords: [25.2797, 54.6872], tweetIds: ['1857678637446955410'] },
@@ -66,6 +67,7 @@ const MapComponent = ({ tweets }) => {
       if (feature) {
         setIsSideBarOpen(true);
         setSelectedTweets(tweets);
+        setSelectedJudgements(judgements);
         console.log(tweets.length)
       }
       else {
@@ -90,7 +92,7 @@ const MapComponent = ({ tweets }) => {
           left: 0,
         }}
       />
-      <SideBar isOpen={isSideBarOpen} tweets={tweets} />
+      <SideBar isOpen={isSideBarOpen} tweets={tweets} judgements={judgements}/>
     </>
   );
 };
