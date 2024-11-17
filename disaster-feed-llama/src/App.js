@@ -1,12 +1,9 @@
-import React from 'react';
-import MapComponent from './Map';
+import { Tweet } from 'react-tweet'
 
-function App() {
-  return (
-    <div className="App">
-      <MapComponent />
-    </div>
+export default function App() {
+    return (
+      <div className="dark">
+        <Tweet id="1680555380416577536"/>
+      </div>
   );
 }
-
-export default App;

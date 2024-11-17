@@ -215,7 +215,7 @@ class DataQuery:
             date_str = row["created_at"]
             date_obj = pd.to_datetime(date_str, format='%a %b %d %H:%M:%S %z %Y')
             formatted_date = date_obj.strftime('%d_%m_%Y')
-            img_path = "data/CrisisMMD_v2.0/data_image/" + self.file_name[:self.file_name.rfind('_', 0, self.file_name.rfind('_'))] + "/" + formatted_date + "/"
+            img_path = "data/CrisisMMD_v2.0/data_image/" + "california_wildfires" + "/" + formatted_date + "/"
             matching_files = [f for f in os.listdir(img_path) if str(row["id"]) in f and f[0]!="."]
             img_paths = [img_path + f for f in matching_files]
             if len(img_paths) > 0:

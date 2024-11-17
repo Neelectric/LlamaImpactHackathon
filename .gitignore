@@ -122,7 +122,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-# .env
+.env
+env.txt
 .venv
 env/
 venv/
@@ -164,3 +165,5 @@ cython_debug/
 .llama_impact/
 backend/CrisisMMD_v2.0.tar.gz
 data/
+
+.disaster/
